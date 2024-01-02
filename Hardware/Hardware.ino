@@ -18,6 +18,7 @@ long long lastButtonPress = millis();
 long long lastSerialComm = millis();
 int serialTimeout = 30000;
 int alarmTiming = 300000;
+char cmd[1]; // Command
 
 void setup() {
   // put your setup code here, to run once:
@@ -43,6 +44,7 @@ void setup() {
   digitalWrite(tempA,HIGH);
   digitalWrite(tempB,HIGH);
   digitalWrite(fanOut,HIGH);
+  Serial.println("Ready!");
 }
 
 void loop() {
@@ -61,8 +63,14 @@ void loop() {
   } else if(!safeShutdown){
     digitalWrite(cpuShutdown,HIGH);
   }
-  char cmd[1]; 
+  if(Serial.available()){ // Stop blinking because data has enetered.
+    digitalWrite(cpuShutdown,HIGH);
+    blinkOn = false;
+  }
+  // Apparently VSCode's Arduino implementation doesnt know about .read(), so arrays it is! 
+  cmd[0] = '\0'; // Clear data
   Serial.readBytes(cmd,1);
+  Serial.print(cmd);
   switch (cmd[0]){
     case 'c': // CPU usage
       analogWrite(cpuLoad,255-Serial.parseInt());
@@ -92,7 +100,7 @@ void loop() {
       digitalWrite(tempB,LOW);
       tone(buzz,2000,1000);
       break;
-    case 'r': //Force reset
+    case 'r': //Force lamp reset
       lastButtonPress=millis();
       noTone(buzz);
       digitalWrite(cpuLoad,HIGH);
@@ -101,6 +109,12 @@ void loop() {
       digitalWrite(tempB,HIGH);
       digitalWrite(fanOut,HIGH);
       break;
+    case 'l': //Foce lamp test/whole arduino reset
+      wdt_disable();
+      wdt_enable(WDTO_15MS);
+      while (1) {}
+      break;
+    case '\n':
     case '\0':
       break;
     default: //Errors

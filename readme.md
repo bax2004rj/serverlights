@@ -7,4 +7,5 @@ To solve this, I developed a device with an Arduino to add the extra lights, and
 ## How this works
 This works by having the Arduino connect to the server through serial, in which the server will send commands to the Arduino and it displays on the lights.
 ## Installation
-Deatails are coming soon and will be on the wiki for this repo.
+Details are coming soon and will be on the wiki for this repo.
+Note: The drivers are (at the moment) Linux exclusive, due to ease of developing tools

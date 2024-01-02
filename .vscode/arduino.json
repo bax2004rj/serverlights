@@ -1,0 +1,6 @@
+{
+    "port": "/dev/ttyACM1",
+    "board": "arduino:avr:leonardo",
+    "programmer": "avrisp",
+    "sketch": "Hardware/Hardware.ino"
+}
