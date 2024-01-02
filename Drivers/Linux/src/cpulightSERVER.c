@@ -14,6 +14,6 @@ int main(){
     serialpoint = fopen(serialLocation,"rw");
     // TODO: Conf file reader
     while (1){
-
+        
     }
 }
