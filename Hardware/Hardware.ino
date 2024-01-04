@@ -70,7 +70,7 @@ void loop() {
   // Apparently VSCode's Arduino implementation doesnt know about .read(), so arrays it is! 
   cmd[0] = '\0'; // Clear data
   Serial.readBytes(cmd,1);
-  Serial.print(cmd);
+  Serial.println(cmd);
   switch (cmd[0]){
     case 'c': // CPU usage
       analogWrite(cpuLoad,255-Serial.parseInt());
@@ -114,6 +114,9 @@ void loop() {
       wdt_enable(WDTO_15MS);
       while (1) {}
       break;
+    case 'v':
+      Serial.println("1.0.3");
+      break;
     case '\n':
     case '\0':
       break;
@@ -129,8 +132,10 @@ void loop() {
     digitalWrite(tempA,HIGH);
     digitalWrite(tempB,HIGH);
     digitalWrite(fanOut,HIGH);
+    Serial.println('r');
   }
   if(digitalRead(resetButton)==true&&lastButtonState==true&&millis()-lastButtonPress>5000){//Reset MCU
+    Serial.println('l');
     wdt_disable();
     wdt_enable(WDTO_15MS);
     while (1) {}

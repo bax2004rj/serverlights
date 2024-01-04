@@ -2,14 +2,15 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: gcc build active file",
+            "label": "C/C++: gcc build app for Linux",
             "command": "/usr/bin/gcc",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "${workspaceFolder}/Drivers/Linux/src/cpulightSERVER.c",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${workspaceFolder}/Drivers/Linux/build/${fileBasenameNoExtension}",
+                "-lc",
             ],
             "options": {
                 "cwd": "${fileDirname}"
