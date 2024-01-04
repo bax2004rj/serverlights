@@ -1,4 +1,5 @@
 # serverlights
+###WARNING: This is still mostly work in progress
 ## Background
 ![my server](img/cover.png)
 This is my server. I recently recovered this from an office e-waste pile, and it has been serving me well as a Nextcloud server.
