@@ -19,6 +19,7 @@ long long lastSerialComm = millis();
 int serialTimeout = 30000;
 int alarmTiming = 300000;
 char cmd[1]; // Command
+bool fanUnreachable = false;
 
 void setup() {
   // put your setup code here, to run once:
@@ -51,14 +52,18 @@ void loop() {
   // put your main code here, to run repeatedly:
   //start time gap for buttons
   lastButtonState=digitalRead(resetButton);
+  //Global blinking lights clock
+  if(millis()%1000==0&&blinkOn == false){  
+    blinkOn = true;
+  } else if(millis()%1000==0&&blinkOn == true){
+    blinkOn = false;
+  }
   //keep checking for serial usage
   if(!Serial.available()&&millis()-lastSerialComm>serialTimeout&&!safeShutdown){
-    if(millis()%1000==0&&blinkOn == false){  
+    if(blinkOn == false){  
       digitalWrite(cpuShutdown,LOW);
-      blinkOn = true;
-    } else if(millis()%1000==0&&blinkOn == true){
+    } else if(blinkOn == true){
       digitalWrite(cpuShutdown,HIGH);
-      blinkOn = false;
     }
   } else if(!safeShutdown){
     digitalWrite(cpuShutdown,HIGH);
@@ -66,6 +71,14 @@ void loop() {
   if(Serial.available()){ // Stop blinking because data has enetered.
     digitalWrite(cpuShutdown,HIGH);
     blinkOn = false;
+  }
+  // Fan unreachable blink
+  if(fanUnreachable==true){
+    if(blinkOn == false){  
+      digitalWrite(fanOut,LOW);
+    } else if(blinkOn == true){
+      digitalWrite(fanOut,HIGH);
+    }
   }
   // Apparently VSCode's Arduino implementation doesnt know about .read(), so arrays it is! 
   cmd[0] = '\0'; // Clear data
@@ -89,8 +102,12 @@ void loop() {
       safeShutdown = true;
       break;
     case 'f': // Fan has gone out
+      fanUnreachable = false; // Clearly false since we're getting detains about the fan
       digitalWrite(fanOut,LOW);
       tone(buzz,1000,1000);
+      break;
+    case 'd': //Fan info unreachable for driver/ACPI disabled.
+      fanUnreachable = true;
       break;
     case 't': //TempA exceeded
       digitalWrite(tempA,LOW);
@@ -132,6 +149,7 @@ void loop() {
     digitalWrite(tempA,HIGH);
     digitalWrite(tempB,HIGH);
     digitalWrite(fanOut,HIGH);
+    fanUnreachable = false;
     Serial.println('r');
   }
   if(digitalRead(resetButton)==true&&lastButtonState==true&&millis()-lastButtonPress>5000){//Reset MCU
