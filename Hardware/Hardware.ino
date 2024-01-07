@@ -59,7 +59,7 @@ void loop() {
     blinkOn = false;
   }
   //keep checking for serial usage
-  if(!Serial.available()&&millis()-lastSerialComm>serialTimeout&&!safeShutdown){
+  if((!Serial.available()||millis()-lastSerialComm>serialTimeout)&&!safeShutdown){
     if(blinkOn == false){  
       digitalWrite(cpuShutdown,LOW);
     } else if(blinkOn == true){
@@ -67,30 +67,33 @@ void loop() {
     }
   } else if(!safeShutdown){
     digitalWrite(cpuShutdown,HIGH);
+    blinkOn = false;
   }
   if(Serial.available()){ // Stop blinking because data has enetered.
     digitalWrite(cpuShutdown,HIGH);
     blinkOn = false;
   }
   // Fan unreachable blink
-  if(fanUnreachable==true){
-    if(blinkOn == false){  
-      digitalWrite(fanOut,LOW);
-    } else if(blinkOn == true){
-      digitalWrite(fanOut,HIGH);
-    }
+  if(blinkOn == false && fanUnreachable==true){  
+    digitalWrite(fanOut,LOW);
+  } else if(blinkOn == true && fanUnreachable==true){
+    digitalWrite(fanOut,HIGH);
+    Serial.println("fd");
   }
   // Apparently VSCode's Arduino implementation doesnt know about .read(), so arrays it is! 
   cmd[0] = '\0'; // Clear data
   Serial.readBytes(cmd,1);
-  Serial.println(cmd);
   switch (cmd[0]){
     case 'c': // CPU usage
       analogWrite(cpuLoad,255-Serial.parseInt());
+      lastSerialComm = millis();
+      Serial.println(cmd);
       break;
     case 'b': // PC booted
       digitalWrite(cpuShutdown,HIGH);
       safeShutdown = false;
+      lastSerialComm = millis();
+      Serial.println(cmd);
       break;
     case 's': // PC safely shut down
       digitalWrite(cpuShutdown,LOW);
@@ -100,22 +103,32 @@ void loop() {
       digitalWrite(tempB,HIGH);
       digitalWrite(fanOut,HIGH);
       safeShutdown = true;
+      lastSerialComm = millis();
+      Serial.println(cmd);
       break;
     case 'f': // Fan has gone out
       fanUnreachable = false; // Clearly false since we're getting detains about the fan
       digitalWrite(fanOut,LOW);
       tone(buzz,1000,1000);
+      lastSerialComm=millis();
+      Serial.println(cmd);
       break;
     case 'd': //Fan info unreachable for driver/ACPI disabled.
       fanUnreachable = true;
+      lastSerialComm=millis();
+      Serial.println(cmd);
       break;
     case 't': //TempA exceeded
       digitalWrite(tempA,LOW);
       tone(buzz,1500,1000);
+      lastSerialComm=millis();
+      Serial.println(cmd);
       break;
     case 'y': //TempB exceeded
       digitalWrite(tempB,LOW);
       tone(buzz,2000,1000);
+      lastSerialComm=millis();
+      Serial.println(cmd);
       break;
     case 'r': //Force lamp reset
       lastButtonPress=millis();
@@ -125,20 +138,26 @@ void loop() {
       digitalWrite(tempA,HIGH);
       digitalWrite(tempB,HIGH);
       digitalWrite(fanOut,HIGH);
+      lastSerialComm=millis();
+      Serial.println(cmd);
       break;
     case 'l': //Foce lamp test/whole arduino reset
       wdt_disable();
+      Serial.println(cmd);
       wdt_enable(WDTO_15MS);
       while (1) {}
       break;
     case 'v':
-      Serial.println("1.0.3");
+      Serial.println(cmd);
+      Serial.println("1.0.5");
+      lastSerialComm=millis();
       break;
     case '\n':
     case '\0':
       break;
     default: //Errors
-      Serial.print('E');
+      Serial.println(cmd);
+      Serial.println('E');
       break;
   }
   if(lastButtonState == false &&digitalRead(resetButton)==true){//Reset alarms
@@ -150,10 +169,10 @@ void loop() {
     digitalWrite(tempB,HIGH);
     digitalWrite(fanOut,HIGH);
     fanUnreachable = false;
-    Serial.println('r');
+    Serial.println("rb");
   }
   if(digitalRead(resetButton)==true&&lastButtonState==true&&millis()-lastButtonPress>5000){//Reset MCU
-    Serial.println('l');
+    Serial.println("lb");
     wdt_disable();
     wdt_enable(WDTO_15MS);
     while (1) {}
