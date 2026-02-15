@@ -1,5 +1,7 @@
 #include <avr/wdt.h>
 
+//Hardware note: all pins are inverted except for cpuShutdown
+
 //Pin definition
 int cpuLoad = 3;
 int cpuShutdown = 4;
@@ -62,13 +64,10 @@ void loop() {
   //keep checking for serial usage
   if((!Serial.available()||millis()-lastSerialComm>serialTimeout)&&!safeShutdown){
     if(blinkOn == false){  
-      digitalWrite(cpuShutdown,LOW);
-    } else if(blinkOn == true){
       digitalWrite(cpuShutdown,HIGH);
+    } else if(blinkOn == true){
+      digitalWrite(cpuShutdown,LOW);
     }
-  } else if(!safeShutdown){
-    digitalWrite(cpuShutdown,HIGH);
-    blinkOn = false;
   }
   if(Serial.available()){ // Stop blinking because data has enetered.
     digitalWrite(cpuShutdown,HIGH);
@@ -81,7 +80,7 @@ void loop() {
   } else if(fanBlinkOn == true && fanUnreachable==true){
     fanBlinkOn = false;
     digitalWrite(fanOut,HIGH);
-    Serial.println("fd");
+    //Serial.println("fd");
   }
   // Apparently VSCode's Arduino implementation doesnt know about .read(), so arrays it is! 
   cmd[0] = '\0'; // Clear data
@@ -99,7 +98,6 @@ void loop() {
       Serial.println(cmd);
       break;
     case 's': // PC safely shut down
-      digitalWrite(cpuShutdown,LOW);
       digitalWrite(cpuLoad,HIGH);
       digitalWrite(cpuShutdown,HIGH);
       digitalWrite(tempA,HIGH);
@@ -153,7 +151,7 @@ void loop() {
       break;
     case 'v':
       Serial.println(cmd);
-      Serial.println("1.0.6");
+      Serial.println("1.0.7");
       lastSerialComm=millis();
       break;
     case '\n':

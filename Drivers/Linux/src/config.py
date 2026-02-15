@@ -15,4 +15,4 @@ def startWindow(window):
 def main():
     curses.wrapper(startWindow)
 
-main()
+#main()

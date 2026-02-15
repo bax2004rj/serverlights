@@ -18,6 +18,7 @@ def readFanSpeed():
     fans = psutil.sensors_temperatures()
     if not fans or fans == "{}":
         print("Error: Fan reading unsupported!")
+        return 0
     try: # Masterclass in nested statements!
         for name, entries in fans.items(): #Search for toplevel
             if name == fanChoiceTopLevel: #Toplevel found
@@ -62,10 +63,10 @@ def main(argv):
         # Read fan speed
         fanNow = readFanSpeed()
         try:
-            if(fanNow>3000):
+            if(fanNow-previousFanSpeed>1000):
                 arduino.write(b'f')
         except TypeError:
-            arduino.write(b'd') ## Write fan warning flag to make it flash fan out light.
+            arduino.write(b'd') ## Write fan warning flag to make it flash the fan out light.
 
 if __name__ == "__main__":
     main(sys.argv[1:])
