@@ -25,6 +25,7 @@ def readFanSpeed():
                         return entry.current
     except Exception:
         print("Error: Fan reading unsupported!")
+        return 0
 
 def main(argv):
     arduino = serial.Serial(serialPoint,9600)

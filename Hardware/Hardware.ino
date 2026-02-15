@@ -9,6 +9,7 @@ int fanOut = 7;
 int resetButton = 8;
 int buzz = 9;
 bool blinkOn = false;
+bool fanBlinkOn = false;
 bool safeShutdown = false;
 
 //button state
@@ -74,9 +75,11 @@ void loop() {
     blinkOn = false;
   }
   // Fan unreachable blink
-  if(blinkOn == false && fanUnreachable==true){  
+  if(fanBlinkOn == false && fanUnreachable==true){
+    fanBlinkOn = true;  
     digitalWrite(fanOut,LOW);
-  } else if(blinkOn == true && fanUnreachable==true){
+  } else if(fanBlinkOn == true && fanUnreachable==true){
+    fanBlinkOn = false;
     digitalWrite(fanOut,HIGH);
     Serial.println("fd");
   }
@@ -107,7 +110,8 @@ void loop() {
       Serial.println(cmd);
       break;
     case 'f': // Fan has gone out
-      fanUnreachable = false; // Clearly false since we're getting detains about the fan
+      fanUnreachable = false; // Clearly false since we're getting details about the fan
+      fanBlinkOn = false;
       digitalWrite(fanOut,LOW);
       tone(buzz,1000,1000);
       lastSerialComm=millis();
