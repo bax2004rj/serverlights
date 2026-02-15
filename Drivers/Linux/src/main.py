@@ -2,6 +2,7 @@ from __future__ import print_function
 import serial
 import psutil
 import sys, getopt
+import config
 
 serialPoint = "/dev/ttyACM0"
 delayTime = 0.1
@@ -61,7 +62,7 @@ def main(argv):
         # Read fan speed
         fanNow = readFanSpeed()
         try:
-            if(fanNow-previousFanSpeed>1000):
+            if(fanNow>3000):
                 arduino.write(b'f')
         except TypeError:
             arduino.write(b'd') ## Write fan warning flag to make it flash fan out light.

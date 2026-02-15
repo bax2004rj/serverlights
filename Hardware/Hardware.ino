@@ -153,7 +153,7 @@ void loop() {
       break;
     case 'v':
       Serial.println(cmd);
-      Serial.println("1.0.5");
+      Serial.println("1.0.6");
       lastSerialComm=millis();
       break;
     case '\n':
